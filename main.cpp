@@ -28,7 +28,6 @@ int main(void)
 {
     sys_init();
 
-    
     /*
     xbeeConnect();
     int i;

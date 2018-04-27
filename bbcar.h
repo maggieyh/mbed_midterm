@@ -1,5 +1,8 @@
 #include "parallax.h"
 #include "mbed.h"
+#include <math.h>      
+#define PI 3.14159265
+
 extern parallax_servo *servo0_ptr, *servo1_ptr;
 extern Ticker servo_ticker;
 extern Ticker encoder_ticker;
@@ -27,7 +30,9 @@ class MyCar
             
             encoder_ticker.attach(&encoder_control, .01);
             
-            
+            car_x = 0;
+            car_y = 0;
+            car_theta = 0;
         }
         float readEncoder() {
             return (float)(*encoder3_ptr);
@@ -47,13 +52,31 @@ class MyCar
             return;
         }
 
-        void ServoTurn( int speed ){
+        void ServoDistaqnce(float distance) 
+        {
+            ServoCtrl(90);
+            while(encoder3_ptr->get_cm() < distance) wait_ms(50);
+            ServoStop();
+        }
+        void ServoTurn(float deg){
+            int speed = 50;
+            if (deg < 0) { speed = -speed; deg = -deg;}
             servo0_ptr->set_speed(speed*0.3);
             servo1_ptr->set_speed(speed*0.7);
+            while(encoder3_ptr->get_cm() < deg * 35 / 360) wait_ms(50);
+            ServoStop();
         }
 
         void PointToPoint(float x, float y) {
-
+            float deltax = x - car_x, deltay = y - car_y;
+            float target = atan (deltay/deltax) * 180.0 / PI; 
+            float turnDeg = target - car_theta;
+            float distance = sqrt(pow(deltax, 2.0)+pow(deltay,2.0)); 
+            ServoTurn(turnDeg);
+            ServoDistaqnce(distance);
+            this->car_x = x;
+            this->car_y = y;
+            this->car_theta = target;
         }
 
         void default_sketch1() {
