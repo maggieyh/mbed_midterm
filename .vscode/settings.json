@@ -6,6 +6,7 @@
         "condition_variable": "cpp",
         "__functional_03": "cpp",
         "functional": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "chrono": "cpp"
     }
 }

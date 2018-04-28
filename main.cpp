@@ -15,6 +15,10 @@ DigitalOut p(LED1);
 InterruptIn sw2btn(SW2);
 int isr_flag = 0;
 int mode = 0; // remote control or local demo
+Ticker gesture_ticker;
+float car_x, car_y, car_theta;
+parallax_servo *servo0_ptr, *servo1_ptr;
+parallax_encoder *encoder3_ptr, *encoder2_ptr;
 
 void sys_init();
 void gesture_handler();
@@ -22,20 +26,82 @@ void xbeeConnect();
 void reply_messange(char *xbee_reply, char *messange);
 void check_addr(char *xbee_reply, char *messenger);
 void mode_switch();
-Ticker gesture_ticker;
-
-float car_x, car_y, car_theta;
-parallax_servo *servo0_ptr, *servo1_ptr;
-parallax_encoder *encoder3_ptr, *encoder2_ptr;
-
 void car_init(PwmOut &pin_servo0, PwmOut &pin_servo1,  DigitalIn &d3, DigitalIn &d2);
-void ServoCtrl( int speed ){
-    servo0_ptr->set_speed(speed*0.3);
-    servo1_ptr->set_speed(-speed*0.7);
-    return;
-}
-
+void ServoCtrl( int speed );
 void ServoStop();
+void ServoDistaqnce(float distance);
+void ServoTurn(float deg);
+void PointToPoint(float x, float y);
+void communicate_mode();
+void default_sketch(int num);
+int main(void)
+{
+    sys_init();
+
+    if (mode == 0) {
+        uLCD.cls();
+        uLCD.printf("Remote\nTrying connect....\n");
+        xbeeConnect();
+        communicate_mode();
+    } else {
+        uLCD.printf("Menu\n^1.Happy face\n 2.Sad face\n 3.Square");
+        int demo_num = 0;
+        while(sw2btn == 1) {
+            
+            if ( GSensor.isGestureAvailable() ) {    
+                switch ( GSensor.readGesture() ) {        // gesture differentiate
+                    case DIR_UP:
+                        demo_num =  abs((demo_num - 1) % 3);
+                        pc.printf("UP\r\n");
+                        break;
+                    case DIR_DOWN:
+                        demo_num = (demo_num + 1) % 3;
+                        pc.printf("DOWN\r\n");
+                        break;
+                    case DIR_RIGHT:
+                    case DIR_LEFT:
+                        pc.printf("RIGHT\r\n");
+                        uLCD.cls(); 
+                        uLCD.printf("running: %d\n", demo_num);
+                        wait(3);
+                        default_sketch(demo_num);
+                        uLCD.cls();
+                        uLCD.printf("Menu\n^1.Happy face\n 2.Sad face\n 3.Square");
+                        break;
+                    default:
+                        pc.printf("NONE\r\n");
+                        break;
+                }
+                // uLCD.cls();
+                // uLCD.printf("Menu\n 0.Happy face\n 1.Sad face\n 2.Square");
+                for(int i = 1; i < 4; i++) { uLCD.locate(0, i); uLCD.printf(" ");} 
+                uLCD.locate(0, demo_num+1);
+                uLCD.printf("^");
+             }
+        }
+    }
+
+
+
+    // ServoTurn(-160);
+    // PointToPoint(10, 0);
+
+    // PointToPoint(6.4, 4.8);
+    // PointToPoint(0,0);
+    // PointToPoint(10, 10);
+
+    // PointToPoint(0, 0);
+  
+    // ServoCtrl(100);
+    // wait(1.0);
+  
+    
+    // ServoStop();
+    // wait(1000);
+}
+void communicate_mode(){
+
+}
 
 void ServoDistaqnce(float distance) 
 {
@@ -45,53 +111,6 @@ void ServoDistaqnce(float distance)
     ServoStop();
 }
 
-void ServoTurn(float deg);
-
-void PointToPoint(float x, float y);
-
-int main(void)
-{
-    sys_init();
-    p = 0;
-    // ServoTurn(-160);
-    // PointToPoint(10, 0);
-    p = 1;
-    // PointToPoint(6.4, 4.8);
-    p = 0;
-    // PointToPoint(0,0);
-    // PointToPoint(10, 10);
-    p = 1;
-    // PointToPoint(0, 0);
-  
-    // ServoCtrl(100);
-    // wait(1.0);
-    p  = 1;
-    
-    // ServoStop();
-    // wait(1000);
-    /*
-    xbeeConnect();
-    int i;
-    char buf[100] = {0};
-
-    while(1) 
-    {
-        i = 0;
-        xbee.getc();
-        while(i<4) {
-            buf[i] = xbee.getc();
-            i++;
-            buf[i]='\0';
-        }
-        xbee.printf("%s", buf);
-        wait(0.1);
-        i = 0; 
-        while(buf[i] != '\0'){
-           buf[i] = 0;
-           i++;
-         }
-    }*/
-}
 
 void ServoTurn(float deg){
     int speed = -60;
@@ -100,7 +119,7 @@ void ServoTurn(float deg){
     //25 encoder 3
     servo0_ptr->set_speed(speed*0.5);
     servo1_ptr->set_speed(speed*0.7);
-    float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
+    // float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
     while(encoder3_ptr->get_cm() < deg * 31.5 / 360.0) {
         // if(abs(encoder3_ptr->get_cm() - deg * 31 / 360.0) < 0.1 * del) {
         //     speed = speed / 3;
@@ -142,11 +161,11 @@ void ServoStop(){
     return;
 }
 
-void displayMenu() 
-{
-
+void ServoCtrl( int speed ){
+    servo0_ptr->set_speed(speed*0.3);
+    servo1_ptr->set_speed(-speed*0.7);
+    return;
 }
-
 
 void PointToPoint(float x, float y) {
     float deltax = x - car_x, deltay = y - car_y;
@@ -205,11 +224,12 @@ void sys_init() {
     // gesture_ticker.attach(&gesture_handler, .01);
     if (succ) {
         uLCD.cls();
+        uLCD.set_font(FONT_7X8);
         uLCD.printf("Welcome\nChoose Mode(Up/Down to move cursor, Right to confirm)\n\n0. Remote\n1. Local\n");
         uLCD.locate(0,9);
-        uLCD.printf("%d", mode);
+        uLCD.printf("choose mode: %d", mode);
         int r = 0;
-        while(1) {
+        while(r == 0) {
             if ( GSensor.isGestureAvailable() ) {    
                 
                 switch ( GSensor.readGesture() ) {        // gesture differentiate
@@ -224,31 +244,28 @@ void sys_init() {
                         mode = abs((mode - 1) % 2);
                         break;
                     case DIR_RIGHT:
-                        uLCD.printf("RIGHT\n");
-                        pc.printf("RIGHT\r\n");
-                        // r=1;
+                    case DIR_LEFT:
+                        uLCD.printf("CONFIRM\n");
+                        r=1;
                         break;
                     default:
                         pc.printf("NONE\r\n");
                         break;
                 }
                 uLCD.locate(0,9);
-                uLCD.printf("%d", mode);
+                uLCD.printf("choose mode: %d", mode);
              }
         }
-        uLCD.printf("jjjjjjj");
-        
-
+        uLCD.cls();
         
     }
     
     
     
 }
+void default_sketch(int num) {
 
-// void default_sketch1() {
-
-// }
+}
 
 
 
