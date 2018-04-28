@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "ios": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "__mutex_base": "cpp",
+        "condition_variable": "cpp"
     }
 }
