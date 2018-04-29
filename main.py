@@ -1,7 +1,20 @@
 import serial
+import sys
 import time
-
+from svgpathtools import svg2paths, wsvg, kinks, smoothed_path
+def frange(beg, end, step):
+    i = beg
+    while i <= end:
+        yield i
+        i += step
 # XBee setting
+str = sys.argv[1]
+paths, _ = svg2paths(str)
+paths = paths[2:-1:2]
+print paths
+print "------"
+for i in frange(0, 1, 0.2):
+    print paths[0].point(i)
 def setupXbee():
     serdev = '/dev/tty.usbserial-AE019MG3'
     s = serial.Serial(serdev, 9600)
@@ -49,4 +62,6 @@ def setupXbee():
     s.close()
 
 
-setupXbee()
+# setupXbee()
+
+

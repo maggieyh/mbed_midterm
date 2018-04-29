@@ -38,13 +38,14 @@ int main(void)
 {
     sys_init();
 
+    mode = 3;
     if (mode == 0) {
         uLCD.cls();
         uLCD.printf("Remote\nTrying connect....\n");
         xbeeConnect();
         communicate_mode();
-    } else {
-        uLCD.printf("Menu\n^1.Happy face\n 2.Sad face\n 3.Square");
+    } else if(mode == 1) {
+        uLCD.printf("Menu\n^1.Circle \n 2.Square\n 3.Triangle");
         int demo_num = 0;
         while(sw2btn == 1) {
             
@@ -66,14 +67,12 @@ int main(void)
                         wait(3);
                         default_sketch(demo_num);
                         uLCD.cls();
-                        uLCD.printf("Menu\n^1.Happy face\n 2.Sad face\n 3.Square");
+                        uLCD.printf("Menu\n 1.Circle \n 2.Square\n 3.Triangle");
                         break;
                     default:
                         pc.printf("NONE\r\n");
                         break;
                 }
-                // uLCD.cls();
-                // uLCD.printf("Menu\n 0.Happy face\n 1.Sad face\n 2.Square");
                 for(int i = 1; i < 4; i++) { uLCD.locate(0, i); uLCD.printf(" ");} 
                 uLCD.locate(0, demo_num+1);
                 uLCD.printf("^");
@@ -81,6 +80,7 @@ int main(void)
         }
     }
 
+    
 
 
     // ServoTurn(-160);
@@ -207,6 +207,7 @@ void mode_switch()
 void sys_init() {
     car_init(pin11, pin12, pin3, pin2);
     // Initialize Sensor with I2C
+    
     int succ = 0;
     if ( GSensor.ginit() ) {
         uLCD.printf("APDS-9960 init\n");
@@ -222,6 +223,8 @@ void sys_init() {
         uLCD.printf("Gesture fail?!\r\n");
     }
     // gesture_ticker.attach(&gesture_handler, .01);
+    return;
+
     if (succ) {
         uLCD.cls();
         uLCD.set_font(FONT_7X8);
@@ -264,7 +267,15 @@ void sys_init() {
     
 }
 void default_sketch(int num) {
-
+    switch(num) {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
+            
+    }
 }
 
 

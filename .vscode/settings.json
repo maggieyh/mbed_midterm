@@ -7,6 +7,7 @@
         "__functional_03": "cpp",
         "functional": "cpp",
         "iterator": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "cmath": "cpp"
     }
 }
