@@ -1,20 +1,17 @@
 import serial
 import sys
+import os
 import time
-from svgpathtools import svg2paths, wsvg, kinks, smoothed_path
+from svgpathtools import svg2paths, wsvg, kinks, smoothed_path, path
+# w_fac = 960.0/10.0
+# h_fac = 720.0/10.0
+
 def frange(beg, end, step):
     i = beg
     while i <= end:
         yield i
         i += step
-# XBee setting
-str = sys.argv[1]
-paths, _ = svg2paths(str)
-paths = paths[2:-1:2]
-print paths
-print "------"
-for i in frange(0, 1, 0.2):
-    print paths[0].point(i)
+
 def setupXbee():
     serdev = '/dev/tty.usbserial-AE019MG3'
     s = serial.Serial(serdev, 9600)
@@ -53,15 +50,38 @@ def setupXbee():
     char = s.read(3)
     print("Exit AT mode.")
     print(char)
-
+    print("connecting...")
     # send to remote
     s.write("abcd")
     line = s.read(5)
     print(line)
+    print("Connected")
 
-    s.close()
+def getPoints(paths):
+    for apath in paths:
+        if type(apath[0]) == path.Line:
+            yield apath.point(0)
+            yield apath.point(1)
+        else:
+            for i in frange(0, 1, 0.1):
+                yield apath.point(i)
+        yield -1-1j
 
 
+# XBee setting
 # setupXbee()
 
+str = sys.argv[1]
+mypaths, _ = svg2paths(os.path.abspath(str))
+mypaths = mypaths[2:-1:2]
+print mypaths
+print "------"
+
+for i in getPoints(mypaths):
+    x = i.real / 960.0*200.0
+    y = i.imag / 720.0*200.0
+    print '{0} {1}'.format(x,y)
+    # s.write(x+" "+y)
+
+    print x, y
 
