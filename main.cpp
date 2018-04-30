@@ -10,7 +10,7 @@ uLCD_4DGL uLCD(D1, D0, D2);
 glibr GSensor(D14,D15);
 Serial pc(USBTX, USBRX);
 Serial xbee(D9, D7);
-PwmOut pin11(D11), pin12(D12);
+PwmOut pin11(D11), pin12(D12), pin5(D5);
 DigitalIn pin3(D3), pin2(D2);
 DigitalOut p(LED1);
 InterruptIn sw2btn(SW2);
@@ -22,9 +22,9 @@ float points[5000][2] = {0};
 int point_idx = 0;
 parallax_servo *servo0_ptr, *servo1_ptr;
 parallax_encoder *encoder3_ptr, *encoder2_ptr;
-
+parallax_stdservo *stdservo_ptr;
 void sys_init();
-void gesture_handler();
+void processPoints();
 void xbeeConnect();
 void reply_messange(char *xbee_reply, char *messange);
 void check_addr(char *xbee_reply, char *messenger);
@@ -39,15 +39,19 @@ void communicate_mode();
 void default_sketch(int num);
 int main(void)
 {
-    mode = 0;
+    mode = 3;
     sys_init();
+    *(stdservo_ptr) = 80;
+    ServoCtrl(100);
+    wait(1);
+    ServoStop();
 
-    
     if (mode == 0) {
         uLCD.cls();
         uLCD.printf("Remote\nTrying connect....\n");
         xbeeConnect();
         communicate_mode();
+        processPoints();
 
     } else if(mode == 1) {
         uLCD.printf("Menu\n^1.Circle \n 2.Square\n 3.Triangle");
@@ -68,7 +72,7 @@ int main(void)
                     case DIR_LEFT:
                         pc.printf("RIGHT\r\n");
                         uLCD.cls(); 
-                        uLCD.printf("running: %d\n", demo_num);
+                        uLCD.printf("running: %d\n", demo_num+1);
                         wait(3);
                         default_sketch(demo_num);
                         uLCD.cls();
@@ -85,7 +89,6 @@ int main(void)
         }
     }
 
-    
 
 
     // ServoTurn(-160);
@@ -134,15 +137,17 @@ void ServoTurn(float deg){
     ServoStop();
 }
 
-void car_init(PwmOut &pin_servo0, PwmOut &pin_servo1,  DigitalIn &d3, DigitalIn &d2) {
+void car_init(PwmOut &pin_servo0, PwmOut &pin_servo1,  DigitalIn &d3, DigitalIn &d2, PwmOut &pin_stdservo) {
     static parallax_servo servo0(pin_servo0);
     static parallax_servo servo1(pin_servo1);
     static parallax_encoder encoder3(d3);
     static parallax_encoder encoder2(d2);
+    static parallax_stdservo stdservo(pin_stdservo);
     servo0_ptr = &servo0;
     servo1_ptr = &servo1;
     encoder3_ptr = &encoder3;
     encoder2_ptr = &encoder2;
+    stdservo_ptr = &stdservo;
 
     servo_ticker.attach(&servo_control, .5);
     servo0 = 0; servo1 = 0;
@@ -209,7 +214,7 @@ void mode_switch()
     }
 }
 void sys_init() {
-    car_init(pin11, pin12, pin3, pin2);
+    car_init(pin11, pin12, pin3, pin2, pin5);
     // Initialize Sensor with I2C
     
     int succ = 0;
@@ -342,6 +347,26 @@ void communicate_mode(){
 
 
 }
+
+void processPoints()
+{
+    int i;
+    *(stdservo_ptr) = 100;
+    if (point_idx < 1) return;
+    PointToPoint(points[0][0], points[0][1]);
+    *(stdservo_ptr) = 85;
+    for( i = 1; i < point_idx; i++) 
+    {
+        if (points[i][0] < 0 || points[i][1] < 0) {
+            *(stdservo_ptr) = 100;
+        } else {
+            PointToPoint(points[i][0], points[i][1]);
+            *(stdservo_ptr) = 85;
+        }
+    }
+    
+    
+}
 void xbeeConnect() {
     char xbee_reply[3];
 
@@ -389,34 +414,4 @@ void xbeeConnect() {
     xbee.printf("ATCN\r\n");
     reply_messange(xbee_reply, "exit AT mode");
     */
-}
-
-
-void gesture_handler()
-{
-    if ( GSensor.isGestureAvailable() ) {         // gesture detect
-            switch ( GSensor.readGesture() ) {        // gesture differentiate
-                case DIR_UP:
-                    pc.printf("UP\r\n");
-                    break;
-                case DIR_DOWN:
-                    pc.printf("DOWN\r\n");
-                    break;
-                case DIR_LEFT:
-                    pc.printf("LEFT\r\n");
-                    break;
-                case DIR_RIGHT:
-                    pc.printf("RIGHT\r\n");
-                    break;
-                case DIR_NEAR:
-                    pc.printf("NEAR\r\n");
-                    break;
-                case DIR_FAR:
-                    pc.printf("FAR\r\n");
-                    break;
-                default:
-                    pc.printf("NONE\r\n");
-                    break;
-            }
-        }
 }
