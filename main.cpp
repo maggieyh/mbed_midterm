@@ -40,12 +40,21 @@ void default_sketch(int num);
 int main(void)
 {
     mode = 3;
+    
     sys_init();
-    *(stdservo_ptr) = 80;
-    ServoCtrl(100);
-    wait(1);
-    ServoStop();
+    // ServoCtrl(100);
+    // wait(1);
+    // ServoStop();
+    *stdservo_ptr = 72;
+    PointToPoint(10, 0);
+    wait(0.5);
+    PointToPoint(10, 10);
+    // wait(0.5);
+    // PointToPoint(0, 10);
+    // wait(0.5);
+    // PointToPoint(0, 0);
 
+    
     if (mode == 0) {
         uLCD.cls();
         uLCD.printf("Remote\nTrying connect....\n");
@@ -109,24 +118,42 @@ int main(void)
 }
 
 
+void TurnPen(float deg) {
+    if (deg < 5 && deg > -5) return;
+    *stdservo_ptr = 100;
+    ServoDistaqnce(5.7);
+    ServoStop();
+    wait(0.5);
+    ServoTurn(deg);
+    wait(0.5);
+    ServoDistaqnce(-4);
+    *stdservo_ptr = 72;
+    ServoStop();
+}
 void ServoDistaqnce(float distance) 
 {
     encoder3_ptr->reset();
-    ServoCtrl(90);
-    while(encoder3_ptr->get_cm() < distance) wait_ms(10);
+    int speed = 90;
+    if (distance < 0) { speed = -1 * speed; distance = -1 * distance;}
+    ServoCtrl(speed);
+    while(encoder3_ptr->get_cm() < distance) wait_ms(3);
     ServoStop();
+    encoder3_ptr->reset();
 }
 
 
 void ServoTurn(float deg){
-    int speed = -60;
+    *stdservo_ptr = 100;
+    
+
+    int speed = -70;
     encoder3_ptr->reset();
     if (deg < 0) { speed = -speed; deg = -deg;}
     //25 encoder 3
-    servo0_ptr->set_speed(speed*0.5);
+    servo0_ptr->set_speed(speed*0.55);
     servo1_ptr->set_speed(speed*0.7);
     // float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
-    while(encoder3_ptr->get_cm() < deg * 31.5 / 360.0) {
+    while(encoder3_ptr->get_cm() < deg * 31 / 360.0) {
         // if(abs(encoder3_ptr->get_cm() - deg * 31 / 360.0) < 0.1 * del) {
         //     speed = speed / 3;
         //     servo0_ptr->set_speed(speed*0.4);
@@ -135,6 +162,8 @@ void ServoTurn(float deg){
         wait_ms(3);
     } 
     ServoStop();
+    
+    // *stdservo_ptr = 75;
 }
 
 void car_init(PwmOut &pin_servo0, PwmOut &pin_servo1,  DigitalIn &d3, DigitalIn &d2, PwmOut &pin_stdservo) {
@@ -187,10 +216,10 @@ void PointToPoint(float x, float y) {
         target = 180+atan (deltay/deltax) * 180.0 / PI;
     }
      
-    float turnDeg = target - car_theta ;
+    float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
     float distance = sqrt(pow(deltax, 2.0)+pow(deltay,2.0)); 
-    
-    ServoTurn(turnDeg);
+    TurnPen(turnDeg);
+    // ServoTurn(turnDeg);
     wait(0.5);
     ServoDistaqnce(distance);
     car_x = x;
@@ -216,7 +245,7 @@ void mode_switch()
 void sys_init() {
     car_init(pin11, pin12, pin3, pin2, pin5);
     // Initialize Sensor with I2C
-    
+    if (mode >= 0) return;
     int succ = 0;
     if ( GSensor.ginit() ) {
         uLCD.printf("APDS-9960 init\n");
@@ -351,17 +380,13 @@ void communicate_mode(){
 void processPoints()
 {
     int i;
-    *(stdservo_ptr) = 100;
     if (point_idx < 1) return;
     PointToPoint(points[0][0], points[0][1]);
-    *(stdservo_ptr) = 85;
     for( i = 1; i < point_idx; i++) 
     {
         if (points[i][0] < 0 || points[i][1] < 0) {
-            *(stdservo_ptr) = 100;
         } else {
             PointToPoint(points[i][0], points[i][1]);
-            *(stdservo_ptr) = 85;
         }
     }
     

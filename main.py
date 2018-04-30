@@ -68,6 +68,7 @@ def getPoints(paths):
 
 # XBee setting
 # setupXbee()
+
 s.write("testj")
 time.sleep(1)
 line = s.read(4)
@@ -78,19 +79,58 @@ mypaths, _ = svg2paths(os.path.abspath(str))
 mypaths = mypaths[2:-1:2]
 print mypaths
 print "------"
-for i in getPoints(mypaths):
-    x = i.real / 960.0*200.0
-    y = i.imag / 720.0*200.0
-    print '{0:.4f} {1:.4f} .'.format(x, y)
-    s.write('{0:.4f} {1:.4f} j'.format(x, y))
+
+# s.write('0 0 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+# s.write('10 0 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+# s.write('10 10 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+# s.write('0 10 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+# s.write('0 0 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+# s.write('-1 -1 j')
+# time.sleep(1)
+# ack = s.read(4)
+# print ack
+minx = 100000
+miny = 100000
+maxy = 0
+points = list(getPoints(mypaths))
+for i in points:
+    x = i.real/10.0
+    y = i.imag/10.0
+    if x < minx and x > 0:
+        minx = x
+    if y < miny and y > 0:
+        miny = y
+    if y > maxy: 
+        maxy = y
+f = open('render.svg','w')
+message = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">'
+idx = 0
+for i in points:  
+    x = i.real/10.0
+    y = i.imag/10.0
+    print '{0:.4f} {1:.4f} .'.format(x-minx, maxy-y)
+    message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="1" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
+    s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
     time.sleep(1)
     ack = s.read(4)
     print ack
-
+    idx += 1
+message += '</svg>'
+f.write(message)
+f.close()
 s.write("endj")
-    # s.write(x+" "+y)
-    # s.write('{0} {1}'.format())
-    # ack = s.read(5)
-    # print ack
-    # done = s.read(5)
-    # print "send new points"
