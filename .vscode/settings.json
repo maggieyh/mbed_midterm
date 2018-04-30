@@ -8,6 +8,7 @@
         "functional": "cpp",
         "iterator": "cpp",
         "chrono": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "queue": "cpp"
     }
 }

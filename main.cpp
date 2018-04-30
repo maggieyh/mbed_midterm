@@ -3,6 +3,7 @@
 #include "parallax.h"
 #include "uLCD_4DGL.h"
 #include <cmath>      
+#include <cstdlib>
 #define PI 3.14159265
 
 uLCD_4DGL uLCD(D1, D0, D2);
@@ -14,9 +15,11 @@ DigitalIn pin3(D3), pin2(D2);
 DigitalOut p(LED1);
 InterruptIn sw2btn(SW2);
 int isr_flag = 0;
-int mode = 0; // remote control or local demo
+int mode = -1; // remote control or local demo
 Ticker gesture_ticker;
 float car_x, car_y, car_theta;
+float points[5000][2] = {0};
+int point_idx = 0;
 parallax_servo *servo0_ptr, *servo1_ptr;
 parallax_encoder *encoder3_ptr, *encoder2_ptr;
 
@@ -36,14 +39,16 @@ void communicate_mode();
 void default_sketch(int num);
 int main(void)
 {
+    mode = 0;
     sys_init();
 
-    mode = 3;
+    
     if (mode == 0) {
         uLCD.cls();
         uLCD.printf("Remote\nTrying connect....\n");
         xbeeConnect();
         communicate_mode();
+
     } else if(mode == 1) {
         uLCD.printf("Menu\n^1.Circle \n 2.Square\n 3.Triangle");
         int demo_num = 0;
@@ -99,9 +104,7 @@ int main(void)
     // ServoStop();
     // wait(1000);
 }
-void communicate_mode(){
 
-}
 
 void ServoDistaqnce(float distance) 
 {
@@ -190,6 +193,7 @@ void PointToPoint(float x, float y) {
     car_theta = target;
     pc.printf("%f | %f  | car_theta : %f \r\n", turnDeg, distance, car_theta);
 }
+
 void mode_switch() 
 {
     pc.printf("jjj");
@@ -223,9 +227,8 @@ void sys_init() {
         uLCD.printf("Gesture fail?!\r\n");
     }
     // gesture_ticker.attach(&gesture_handler, .01);
-    return;
 
-    if (succ) {
+    if (succ && mode < 0) {
         uLCD.cls();
         uLCD.set_font(FONT_7X8);
         uLCD.printf("Welcome\nChoose Mode(Up/Down to move cursor, Right to confirm)\n\n0. Remote\n1. Local\n");
@@ -274,7 +277,7 @@ void default_sketch(int num) {
             break;
         case 2:
             break;
-            
+
     }
 }
 
@@ -285,7 +288,7 @@ void reply_messange(char *xbee_reply, char *messange){
     xbee_reply[1] = xbee.getc();
     xbee_reply[2] = xbee.getc();
     if(xbee_reply[1] == 'O' && xbee_reply[2] == 'K'){
-    pc.printf("%s\r\n", messange);
+    uLCD.printf("%s\n", messange);
     xbee_reply[0] = '\0';
     xbee_reply[1] = '\0';
     xbee_reply[2] = '\0';
@@ -297,18 +300,67 @@ void check_addr(char *xbee_reply, char *messenger)
     xbee_reply[0] = xbee.getc();
     xbee_reply[1] = xbee.getc();
     xbee_reply[2] = xbee.getc();
-    pc.printf("%s = %c%c\r\n", messenger, xbee_reply[1], xbee_reply[2]);
+    uLCD.printf("%s = %c%c\r\n", messenger, xbee_reply[1], xbee_reply[2]);
     xbee_reply[0] = '\0';
     xbee_reply[1] = '\0';
     xbee_reply[2] = '\0';
 }
 
-void xbeeConnect() {
-    
-    pc.baud(9600);
+void communicate_mode(){
+    uLCD.printf("Receiving...");
+    int i;
+    char buf[100] = {0};
+    while(1){
+      i = 0;
+      while (i < 50){
+        buf[i] = xbee.getc();
+        i++;
+        buf[i] = '\0';
+        if (buf[i-1] == 'j') { 
+            if (buf[0] == 'e') { break;}
+            char *pEnd;
+            points[point_idx][0] = strtof(buf, &pEnd);
+            points[point_idx][1] = strtof(pEnd, NULL);
+            point_idx++;
+            break;  
+        }
+        
+      }
 
+      xbee.printf("ACKN");
+      if (buf[0] == 'e') { break;}
+      wait(0.1);
+      while(i >= 0 ){
+        buf[i] = 0;
+        i--;
+      }
+    }
+    for(int j = 0; j < point_idx; j++) {
+        pc.printf("%3f, %3f\r\n", points[j][0], points[j][1]);
+    }
+
+
+
+}
+void xbeeConnect() {
     char xbee_reply[3];
 
+    xbee.getc(); //remove the first redundant char
+    int i;
+    char buf[20] = {0};
+    i = 0;
+    while (i < 10) {
+        buf[i] = xbee.getc();
+        i++;
+        buf[i] = '\0';
+        if (buf[i-1] == 'j') { 
+            break;  
+        }
+    
+    }
+    xbee.printf("ACKN");
+    uLCD.printf("Connected\n");
+    /*
     // XBee setting
     xbee.baud(9600);
     xbee.printf("+++");
@@ -336,28 +388,7 @@ void xbeeConnect() {
 
     xbee.printf("ATCN\r\n");
     reply_messange(xbee_reply, "exit AT mode");
-    xbee.getc();
-
-    // start
-    pc.printf("start\r\n");
-    char buf[100] = {0};
-    int i = 0;
-
-    xbee.getc();
-    while (i < 4 || sw2btn == 1){
-        buf[i] = xbee.getc();
-        i++;
-        buf[i] = '\0';
-    }
-    xbee.printf("%s", buf);
-    wait(0.1);
-
-    i = 0;
-    while(buf[i] != '\0'){
-        buf[i] = 0;
-        i++;
-    }
-    uLCD.printf("\nConnected!\n");
+    */
 }
 
 
