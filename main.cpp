@@ -41,16 +41,16 @@ void TurnPen(float deg);
 int deg_ser = 63;
 int main(void)
 {
-    mode = 3;
+    // mode = 3;
     
     sys_init();
     // ServoCtrl(100);
     // wait(1);
-    // ServoStop();
+    ServoStop();
     // *stdservo_ptr = deg_ser;
-    wait(1);
+    // wait(1);
     // *stdservo_ptr = 100;
-    TurnPen(60);
+    // TurnPen(60);
 
     // ServoTurn(45);
     // *stdservo_ptr = deg_ser;
@@ -94,6 +94,7 @@ int main(void)
                         default_sketch(demo_num);
                         uLCD.cls();
                         uLCD.printf("Menu\n 1.Square \n 2.Triangle\n 3.Circle");
+                        demo_num = 0;
                         break;
                     default:
                         pc.printf("NONE\r\n");
@@ -278,22 +279,23 @@ void sys_init() {
     // Initialize Sensor with I2C
     if (mode >= 0) return;
     int succ = 0;
-    // if ( GSensor.ginit() ) {
-    //     uLCD.printf("APDS-9960 init\n");
-    //     succ = 1;
-    // } else {
-    //     uLCD.printf("APDS-9960 fail\n");
-    // }
-    // // Start running the APDS-9960 gesture sensor engine
-    // if ( GSensor.enableGestureSensor(true) ) {
-    //     succ = 1;
-    //     uLCD.printf("Gesture enable\r\n");
-    // } else {
-    //     uLCD.printf("Gesture fail?!\r\n");
-    // }
+    if ( GSensor.ginit() ) {
+        uLCD.printf("APDS-9960 init\n");
+        succ = 1;
+    } else {
+        uLCD.printf("APDS-9960 fail\n");
+    }
+    // Start running the APDS-9960 gesture sensor engine
+    if ( GSensor.enableGestureSensor(true) ) {
+        succ = 1;
+        uLCD.printf("Gesture enable\r\n");
+    } else {
+        uLCD.printf("Gesture fail?!\r\n");
+    }
     // gesture_ticker.attach(&gesture_handler, .01);
 
     if (succ && mode < 0) {
+        mode = 0;
         uLCD.cls();
         uLCD.set_font(FONT_7X8);
         uLCD.printf("Welcome\nChoose Mode(Up/Down to move cursor, Right to confirm)\n\n0. Remote\n1. Local\n");
