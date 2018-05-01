@@ -32,7 +32,7 @@ void mode_switch();
 void car_init(PwmOut &pin_servo0, PwmOut &pin_servo1,  DigitalIn &d3, DigitalIn &d2);
 void ServoCtrl( int speed );
 void ServoStop();
-void ServoDistaqnce(float distance);
+void ServoDistance(float distance);
 void ServoTurn(float deg);
 void PointToPoint(float x, float y);
 void communicate_mode();
@@ -56,14 +56,8 @@ int main(void)
     // ServoTurn(-180);
     // wait(100);
     *stdservo_ptr = deg_ser;
-    TurnPen(90);
-    // PointToPoint(10, 0);
-    // wait(0.5);
-    // PointToPoint(10, 10);
-    // wait(0.5);
-    // PointToPoint(0, 10);
-    // wait(0.5);
-    // PointToPoint(0, 0);
+    // TurnPen(120);
+    
     
     
     
@@ -75,7 +69,7 @@ int main(void)
         processPoints();
 
     } else if(mode == 1) {
-        uLCD.printf("Menu\n^1.Circle \n 2.Square\n 3.Triangle");
+        uLCD.printf("Menu\n^1.Square \n 2.Tirangle\n 3.Circle");
         int demo_num = 0;
         while(sw2btn == 1) {
             
@@ -97,7 +91,7 @@ int main(void)
                         wait(3);
                         default_sketch(demo_num);
                         uLCD.cls();
-                        uLCD.printf("Menu\n 1.Circle \n 2.Square\n 3.Triangle");
+                        uLCD.printf("Menu\n 1.Square \n 2.Triangle\n 3.Circle");
                         break;
                     default:
                         pc.printf("NONE\r\n");
@@ -135,32 +129,31 @@ void TurnPen(float deg) {
     *stdservo_ptr = 100;
     int speed = 90;
     ServoCtrl(speed);
-    wait_ms(1200);
-    // ServoStop();
-    servo0_ptr->set_speed(0);
-    servo1_ptr->set_speed(1);
+    wait_ms(800+20*abs(deg-90)*(deg > 90? 1: 0));
+    ServoStop();
     servo0_ptr->servo_control();
     servo1_ptr->servo_control();
-    
     wait(1);
     ServoTurn(deg);
     wait(1);
-    ServoDistaqnce(-4);
+    if(abs(deg) <= 90) 
+        ServoDistance(-4);
+    else 
+        ServoDistance(-2.5);
     *stdservo_ptr = deg_ser;
     ServoStop();
 }
-void ServoDistaqnce(float distance) 
+void ServoDistance(float distance) 
 {
     encoder3_ptr->reset();
     int speed = 90;
     if (distance < 0) { speed = -1 * speed; distance = -1 * distance;}
     ServoCtrl(speed);
     while(encoder3_ptr->get_cm() < distance) wait_ms(3);
-    servo0_ptr->set_speed(0);
-    servo1_ptr->set_speed(1);
+    ServoStop();
     servo0_ptr->servo_control();
     servo1_ptr->servo_control();
-    ServoStop();
+    
     encoder3_ptr->reset();
 }
 
@@ -253,7 +246,7 @@ void PointToPoint(float x, float y) {
     TurnPen(turnDeg);
     // ServoTurn(turnDeg);
     wait(0.5);
-    ServoDistaqnce(distance);
+    ServoDistance(distance);
     car_x = x;
     car_y = y;
     car_theta = target;
@@ -338,13 +331,31 @@ void sys_init() {
 void default_sketch(int num) {
     switch(num) {
         case 0:
+            PointToPoint(10, 0);
+            wait(1.0);
+            PointToPoint(10, 10);
+            wait(1);
+            PointToPoint(0, 10);
+            wait(1);
+            PointToPoint(0, 0);
+            *stdservo_ptr = 100;
+            
             break;
         case 1:
+            PointToPoint(15, 0);
+            wait(1.0);
+            PointToPoint(7.5, 13);
+            wait(1);
+            PointToPoint(0, 0);
+            *stdservo_ptr=100;
             break;
         case 2:
             break;
 
     }
+    float target = 0;
+    float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
+    TurnPen(turnDeg);
 }
 
 
