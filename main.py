@@ -3,10 +3,9 @@ import sys
 import os
 import time
 from svgpathtools import svg2paths, wsvg, kinks, smoothed_path, path
-# w_fac = 960.0/10.0
-# h_fac = 720.0/10.0
-# serdev = '/dev/tty.usbserial-AE019MG3'
-# s = serial.Serial(serdev, 9600)
+
+serdev = '/dev/tty.usbserial-AE019MG3'
+s = serial.Serial(serdev, 9600)
 def frange(beg, end, step):
     i = beg
     while i <= end:
@@ -58,8 +57,10 @@ def setupXbee():
 def getPoints(paths):
     for apath in paths:
         if type(apath[0]) == path.Line:
+            # or ((apath.point(0)-apath.point(1)).real ** 2 +(apath.point(0)-apath.point(1)).imag ** 2) < 4 
             yield apath.point(0)
             yield apath.point(1)
+        # elif apath.point(0)
         else:
             for i in frange(0, 1, 0.1):
                 yield apath.point(i)
@@ -69,41 +70,17 @@ def getPoints(paths):
 # XBee setting
 # setupXbee()
 
-# s.write("testj")
-# time.sleep(1)
-# line = s.read(4)
-# print(line)
-# print("Connected")
+s.write("8888 j")
+time.sleep(1)
+line = s.read(4)
+print(line)
+print("Connected")
 str = sys.argv[1]
 mypaths, _ = svg2paths(os.path.abspath(str))
 mypaths = mypaths[2:-1:2]
 print mypaths
 print "------"
 
-# s.write('0 0 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
-# s.write('10 0 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
-# s.write('10 10 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
-# s.write('0 10 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
-# s.write('0 0 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
-# s.write('-1 -1 j')
-# time.sleep(1)
-# ack = s.read(4)
-# print ack
 minx = 100000
 miny = 100000
 maxy = 0
@@ -124,11 +101,11 @@ for i in points:
     x = i.real/10.0
     y = i.imag/10.0
     print '{0:.4f} {1:.4f} .'.format(x-minx, maxy-y)
-    message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="1" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
-    # s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
-    # time.sleep(1)
-    # ack = s.read(4)
-    # print ack
+    message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="0.5" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
+    s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
+    time.sleep(1)
+    ack = s.read(4)
+    print ack
     idx += 1
 message += '</svg>'
 f.write(message)

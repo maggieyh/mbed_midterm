@@ -48,19 +48,21 @@ int main(void)
     // wait(1);
     // ServoStop();
     // *stdservo_ptr = deg_ser;
+    wait(1);
     // *stdservo_ptr = 100;
-    // ServoTurn(90);
+    TurnPen(60);
+
+    // ServoTurn(45);
+    // *stdservo_ptr = deg_ser;
     // p = 0;
     // ServoStop();
     // wait(1);
     // ServoTurn(-180);
     // wait(100);
-    *stdservo_ptr = deg_ser;
+    // *stdservo_ptr = deg_ser;
     // TurnPen(120);
     
-    
-    
-    
+
     if (mode == 0) {
         uLCD.cls();
         uLCD.printf("Remote\nTrying connect....\n");
@@ -126,10 +128,13 @@ int main(void)
 
 void TurnPen(float deg) {
     if (deg < 5 && deg > -5) return;
+
     *stdservo_ptr = 100;
-    int speed = 90;
+    int speed = 90, jt = 800;
+    if (abs(deg) <= 90) { jt += 6 * abs(deg-90); }
+    else { jt = 1200; }
     ServoCtrl(speed);
-    wait_ms(800+20*abs(deg-90)*(deg > 90? 1: 0));
+    wait_ms(jt);
     ServoStop();
     servo0_ptr->servo_control();
     servo1_ptr->servo_control();
@@ -173,7 +178,6 @@ void ServoTurn(float deg){
     // servo0_ptr->servo_control();
     // servo1_ptr->servo_control();
     // wait(0.96);
-    float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
     while(encoder3_ptr->get_cm() < deg * 31 / 360.0) {
         // if(abs(encoder3_ptr->get_cm() - deg * 31 / 360.0) < 0.1 * del) {
         //     speed = speed / 3;
@@ -230,6 +234,7 @@ void ServoCtrl( int speed ){
 }
 
 void PointToPoint(float x, float y) {
+    if (x < 0 || y < 0) return;
     float deltax = x - car_x, deltay = y - car_y;
     
     float target = 0;
@@ -249,7 +254,8 @@ void PointToPoint(float x, float y) {
     ServoDistance(distance);
     car_x = x;
     car_y = y;
-    car_theta = target;
+    if (turnDeg > 5 || turnDeg < -5)
+        car_theta = target;
     pc.printf("%f | %f  | car_theta : %f \r\n", turnDeg, distance, car_theta);
 }
 
@@ -424,36 +430,52 @@ void processPoints()
 {
     int i;
     if (point_idx < 1) return;
-    PointToPoint(points[0][0], points[0][1]);
+    *stdservo_ptr = 100;
+    // for(i = 0; i < point_idx; i++)
+    // pc.printf("%f | %f", points[i][0], points[i][1]);
+    if(points[0][0] + points[0][1] > 3) {
+         *stdservo_ptr = 100;
+         PointToPoint(points[0][0], points[0][1]);
+    }
+    *stdservo_ptr = deg_ser;
     for( i = 1; i < point_idx; i++) 
     {
-        if (points[i][0] < 0 || points[i][1] < 0) {
-        } else {
+        // if (points[i][0] < 0 || points[i][1] < 0) {
+        //     *stdservo_ptr = 100;
+        //     deg_ser = 100;
+        //     if(i + 1 < point_idx) {
+        //         PointToPoint(points[i+1][0], points[i+1][1]);
+        //         i++;
+        //     }            
+        //     deg_ser = 63;
+        // } else {
+           
+            if (points[i][0] < 0 || points[i][1] < 0) {
+                if(i + 1 < point_idx) {
+                    deg_ser = 100;
+                    PointToPoint(points[i+1][0], points[i+1][1]);
+                    deg_ser = 63;
+                    i+=2;
+                }
+            }
+        
             PointToPoint(points[i][0], points[i][1]);
-        }
+            // if (i + 1 < point_idx && (points[i+1][0] < 0 || points[i+1][1] < 0))
+            //     deg_ser = 100;
+            // if (i - 1 >= 0 && (points[i-1][0] < 0 || points[i-1][1] < 0))
+            //     deg_ser = 63; 
+        // }
     }
     
+    *stdservo_ptr = 100;
+    PointToPoint(0, 0);
     
 }
 void xbeeConnect() {
     char xbee_reply[3];
-
-    xbee.getc(); //remove the first redundant char
-    int i;
-    char buf[20] = {0};
-    i = 0;
-    while (i < 10) {
-        buf[i] = xbee.getc();
-        i++;
-        buf[i] = '\0';
-        if (buf[i-1] == 'j') { 
-            break;  
-        }
-    
-    }
-    xbee.printf("ACKN");
-    uLCD.printf("Connected\n");
-    /*
+   /*
+    pc.baud(9600);
+    pc.printf("imherej\r\n");
     // XBee setting
     xbee.baud(9600);
     xbee.printf("+++");
@@ -481,5 +503,23 @@ void xbeeConnect() {
 
     xbee.printf("ATCN\r\n");
     reply_messange(xbee_reply, "exit AT mode");
-    */
+
+pc.printf("hhh\r\n");
+*/
+    xbee.getc(); //remove the first redundant char
+    int i;
+    char buf[20] = {0};
+    i = 0;
+    while (i < 10) {
+        buf[i] = xbee.getc();
+        i++;
+        buf[i] = '\0';
+        if (buf[i-1] == 'j') { 
+            break;  
+        }
+    
+    }
+    xbee.printf("ACKN");
+    uLCD.printf("Connected\n");
+       
 }
