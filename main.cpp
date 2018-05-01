@@ -37,6 +37,8 @@ void ServoTurn(float deg);
 void PointToPoint(float x, float y);
 void communicate_mode();
 void default_sketch(int num);
+void TurnPen(float deg);
+int deg_ser = 63;
 int main(void)
 {
     mode = 3;
@@ -45,15 +47,25 @@ int main(void)
     // ServoCtrl(100);
     // wait(1);
     // ServoStop();
-    *stdservo_ptr = 72;
-    PointToPoint(10, 0);
-    wait(0.5);
-    PointToPoint(10, 10);
+    // *stdservo_ptr = deg_ser;
+    // *stdservo_ptr = 100;
+    // ServoTurn(90);
+    // p = 0;
+    // ServoStop();
+    // wait(1);
+    // ServoTurn(-180);
+    // wait(100);
+    *stdservo_ptr = deg_ser;
+    TurnPen(90);
+    // PointToPoint(10, 0);
+    // wait(0.5);
+    // PointToPoint(10, 10);
     // wait(0.5);
     // PointToPoint(0, 10);
     // wait(0.5);
     // PointToPoint(0, 0);
-
+    
+    
     
     if (mode == 0) {
         uLCD.cls();
@@ -121,13 +133,20 @@ int main(void)
 void TurnPen(float deg) {
     if (deg < 5 && deg > -5) return;
     *stdservo_ptr = 100;
-    ServoDistaqnce(5.7);
-    ServoStop();
-    wait(0.5);
+    int speed = 90;
+    ServoCtrl(speed);
+    wait_ms(1200);
+    // ServoStop();
+    servo0_ptr->set_speed(0);
+    servo1_ptr->set_speed(1);
+    servo0_ptr->servo_control();
+    servo1_ptr->servo_control();
+    
+    wait(1);
     ServoTurn(deg);
-    wait(0.5);
+    wait(1);
     ServoDistaqnce(-4);
-    *stdservo_ptr = 72;
+    *stdservo_ptr = deg_ser;
     ServoStop();
 }
 void ServoDistaqnce(float distance) 
@@ -137,22 +156,31 @@ void ServoDistaqnce(float distance)
     if (distance < 0) { speed = -1 * speed; distance = -1 * distance;}
     ServoCtrl(speed);
     while(encoder3_ptr->get_cm() < distance) wait_ms(3);
+    servo0_ptr->set_speed(0);
+    servo1_ptr->set_speed(1);
+    servo0_ptr->servo_control();
+    servo1_ptr->servo_control();
     ServoStop();
     encoder3_ptr->reset();
 }
-
 
 void ServoTurn(float deg){
     *stdservo_ptr = 100;
     
 
-    int speed = -70;
+    int speed = -75;
     encoder3_ptr->reset();
     if (deg < 0) { speed = -speed; deg = -deg;}
     //25 encoder 3
-    servo0_ptr->set_speed(speed*0.55);
+    servo0_ptr->set_speed(speed*0.5);
     servo1_ptr->set_speed(speed*0.7);
-    // float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
+    // wait_ms(1250.0*deg/90.0);
+    // servo0_ptr->set_speed(0);
+    // servo1_ptr->set_speed(0);
+    // servo0_ptr->servo_control();
+    // servo1_ptr->servo_control();
+    // wait(0.96);
+    float del = abs(encoder3_ptr->get_cm() - deg * 31.5 / 360.0);
     while(encoder3_ptr->get_cm() < deg * 31 / 360.0) {
         // if(abs(encoder3_ptr->get_cm() - deg * 31 / 360.0) < 0.1 * del) {
         //     speed = speed / 3;
@@ -161,7 +189,11 @@ void ServoTurn(float deg){
         // }
         wait_ms(3);
     } 
-    ServoStop();
+    servo0_ptr->set_speed(0);
+    servo1_ptr->set_speed(0);
+    servo0_ptr->servo_control();
+    servo1_ptr->servo_control();
+    // ServoStop();
     
     // *stdservo_ptr = 75;
 }
@@ -247,19 +279,19 @@ void sys_init() {
     // Initialize Sensor with I2C
     if (mode >= 0) return;
     int succ = 0;
-    if ( GSensor.ginit() ) {
-        uLCD.printf("APDS-9960 init\n");
-        succ = 1;
-    } else {
-        uLCD.printf("APDS-9960 fail\n");
-    }
-    // Start running the APDS-9960 gesture sensor engine
-    if ( GSensor.enableGestureSensor(true) ) {
-        succ = 1;
-        uLCD.printf("Gesture enable\r\n");
-    } else {
-        uLCD.printf("Gesture fail?!\r\n");
-    }
+    // if ( GSensor.ginit() ) {
+    //     uLCD.printf("APDS-9960 init\n");
+    //     succ = 1;
+    // } else {
+    //     uLCD.printf("APDS-9960 fail\n");
+    // }
+    // // Start running the APDS-9960 gesture sensor engine
+    // if ( GSensor.enableGestureSensor(true) ) {
+    //     succ = 1;
+    //     uLCD.printf("Gesture enable\r\n");
+    // } else {
+    //     uLCD.printf("Gesture fail?!\r\n");
+    // }
     // gesture_ticker.attach(&gesture_handler, .01);
 
     if (succ && mode < 0) {

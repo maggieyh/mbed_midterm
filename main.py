@@ -5,8 +5,8 @@ import time
 from svgpathtools import svg2paths, wsvg, kinks, smoothed_path, path
 # w_fac = 960.0/10.0
 # h_fac = 720.0/10.0
-serdev = '/dev/tty.usbserial-AE019MG3'
-s = serial.Serial(serdev, 9600)
+# serdev = '/dev/tty.usbserial-AE019MG3'
+# s = serial.Serial(serdev, 9600)
 def frange(beg, end, step):
     i = beg
     while i <= end:
@@ -69,11 +69,11 @@ def getPoints(paths):
 # XBee setting
 # setupXbee()
 
-s.write("testj")
-time.sleep(1)
-line = s.read(4)
-print(line)
-print("Connected")
+# s.write("testj")
+# time.sleep(1)
+# line = s.read(4)
+# print(line)
+# print("Connected")
 str = sys.argv[1]
 mypaths, _ = svg2paths(os.path.abspath(str))
 mypaths = mypaths[2:-1:2]
@@ -125,10 +125,10 @@ for i in points:
     y = i.imag/10.0
     print '{0:.4f} {1:.4f} .'.format(x-minx, maxy-y)
     message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="1" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
-    s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
-    time.sleep(1)
-    ack = s.read(4)
-    print ack
+    # s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
+    # time.sleep(1)
+    # ack = s.read(4)
+    # print ack
     idx += 1
 message += '</svg>'
 f.write(message)
