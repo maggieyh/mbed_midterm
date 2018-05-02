@@ -38,21 +38,31 @@ void PointToPoint(float x, float y);
 void communicate_mode();
 void default_sketch(int num);
 void TurnPen(float deg);
-int deg_ser = 61;
+int deg_ser = 60;
 int main(void)
 {
-    mode = 3;
+    // mode = 3;
     
     sys_init();
-    *stdservo_ptr = deg_ser;
+    // *stdservo_ptr = deg_ser;
+    // deg_ser = 100;
+    // PointToPoint(0.0, 6.35);
+    // deg_ser = 60;
+
+    // PointToPoint(16.5669, 7.6);
+    // deg_ser = 100;
+    // PointToPoint(21.3011,  8.4703);
+    // deg_ser = 60;
+    // PointToPoint(10.4633 , 13.5790 );
+    // deg_ser = 100;
+    // PointToPoint(11.5848, 0);
+    // deg_ser = 60;
+    // PointToPoint(21.6761,6.9764);
     // ServoCtrl(100);
     // wait(1);
     // ServoStop();
-    int vec = -60;
-    
     // *stdservo_ptr = 100;
     // TurnPen(60);
-
     // ServoTurn(45);
     // *stdservo_ptr = deg_ser;
     // p = 0;
@@ -62,7 +72,6 @@ int main(void)
     // wait(100);
     // *stdservo_ptr = deg_ser;
     // TurnPen(120);
-    
 
     if (mode == 0) {
         uLCD.cls();
@@ -109,28 +118,11 @@ int main(void)
         }
     }
 
-
-
-    // ServoTurn(-160);
-    // PointToPoint(10, 0);
-
-    // PointToPoint(6.4, 4.8);
-    // PointToPoint(0,0);
-    // PointToPoint(10, 10);
-
-    // PointToPoint(0, 0);
-  
-    // ServoCtrl(100);
-    // wait(1.0);
-  
-    
-    // ServoStop();
-    // wait(1000);
 }
 
 
 void TurnPen(float deg) {
-    if (deg < 5 && deg > -5) return;
+    // if (deg < 5 && deg > -5) return;
 
     *stdservo_ptr = 100;
     int speed = 90, jt = 800;
@@ -142,6 +134,7 @@ void TurnPen(float deg) {
     servo0_ptr->servo_control();
     servo1_ptr->servo_control();
     wait(1);
+    
     ServoTurn(deg);
     wait(1);
     if(abs(deg) <= 90) 
@@ -149,6 +142,7 @@ void TurnPen(float deg) {
     else 
         ServoDistance(-2.5);
     *stdservo_ptr = deg_ser;
+    wait(0.1);
     ServoStop();
 }
 void ServoDistance(float distance) 
@@ -235,7 +229,7 @@ void ServoCtrl( int speed ){
     servo1_ptr->set_speed(-speed*0.7);
     return;
 }
-
+int transit = 0;
 void PointToPoint(float x, float y) {
     if (x < 0 || y < 0) return;
     float deltax = x - car_x, deltay = y - car_y;
@@ -251,7 +245,14 @@ void PointToPoint(float x, float y) {
      
     float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
     float distance = sqrt(pow(deltax, 2.0)+pow(deltay,2.0)); 
-    TurnPen(turnDeg);
+    // if (transit) { 
+        *stdservo_ptr = 100;
+    //     ServoTurn(turnDeg);
+    //     *stdservo_ptr = deg_ser;
+    // } else {
+        TurnPen(turnDeg);
+    // }
+    
     // ServoTurn(turnDeg);
     wait(0.5);
     ServoDistance(distance);
@@ -339,6 +340,7 @@ void sys_init() {
     
 }
 void default_sketch(int num) {
+    float turnDeg;
     switch(num) {
         case 0:
             PointToPoint(10, 0);
@@ -358,10 +360,10 @@ void default_sketch(int num) {
             wait(1);
             PointToPoint(0, 0);
             *stdservo_ptr=100;
-            float target = 0;
-            float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
+            turnDeg = abs(0 - car_theta) > 180 ? (360 - abs(0-car_theta)) * ((0 - car_theta) > 0 ? -1 : 1) : 0 - car_theta ;
             TurnPen(turnDeg);
             break;
+
         case 2:
             servo1_ptr->set_ramp(1500);
             servo0_ptr->set_ramp(1500);
@@ -370,6 +372,8 @@ void default_sketch(int num) {
             
             wait(10);
             ServoStop();
+            break;
+        default:
             break;
 
     }
@@ -443,12 +447,22 @@ void processPoints()
     int i;
     if (point_idx < 1) return;
     *stdservo_ptr = 100;
+    // for(i = 0; i < point_idx; i++) {
+    //     xbee.printf("%5.0f%5.0f|", points[i][0], points[i][1]);
+    //     wait(0.5);
+    // }
+    // return;
     // for(i = 0; i < point_idx; i++)
     // pc.printf("%f | %f", points[i][0], points[i][1]);
-    if(points[0][0] + points[0][1] > 3) {
+    // if(points[0][0] + points[0][1] > 3) {
+        deg_ser = 100;
          *stdservo_ptr = 100;
          PointToPoint(points[0][0], points[0][1]);
-    }
+         deg_ser = 61;
+         xbee.printf("%5.1f%5.1f", points[0][0], points[0][1]);
+         wait(1);
+    // }
+
     *stdservo_ptr = deg_ser;
     for( i = 1; i < point_idx; i++) 
     {
@@ -465,15 +479,17 @@ void processPoints()
             if (points[i][0] < 0 || points[i][1] < 0) {
                 if(i + 1 < point_idx) {
                     deg_ser = 100;
+                    transit = 1;
                     PointToPoint(points[i+1][0], points[i+1][1]);
-                     xbee.printf("%5.3f %5.3f", points[i+1][0], points[i+1][1]);
+                    transit = 1;
+                     xbee.printf("%5.1f%5.1f", points[i+1][0], points[i+1][1]);
                     deg_ser = 61;
                     i++;
                     continue;
                 }
             }
             
-            xbee.printf("%5.1f %5.1f", points[i][0], points[i][1]);
+            xbee.printf("%5.1f%5.1f", points[i][0], points[i][1]);
             wait(0.5);
             PointToPoint(points[i][0], points[i][1]);
             // if (i + 1 < point_idx && (points[i+1][0] < 0 || points[i+1][1] < 0))
@@ -482,7 +498,7 @@ void processPoints()
             //     deg_ser = 63; 
         // }
     }
-    
+    xbee.printf("e0000000000000");
     deg_ser = 100;
     PointToPoint(0, 0);
     
