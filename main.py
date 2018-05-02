@@ -21,7 +21,7 @@ def setupXbee():
     print("Set MY 0x81.")
     print(char)
 
-    s.write("ATDL 0x80\r\n")
+    s.write("ATDL 0x80\r\n") 
     char = s.read(3)
     print("Set DL 0x80.")
     print(char)
@@ -77,7 +77,10 @@ print(line)
 print("Connected")
 str = sys.argv[1]
 mypaths, _ = svg2paths(os.path.abspath(str))
-mypaths = mypaths[2:-1:2]
+if len(mypaths) == 1:
+    mypaths = mypaths[1]
+else:
+    mypaths = mypaths[2:-1:2]
 print mypaths
 print "------"
 
@@ -86,8 +89,10 @@ miny = 100000
 maxy = 0
 points = list(getPoints(mypaths))
 for i in points:
-    x = i.real/10.0
-    y = i.imag/10.0
+    if not type(i) is complex: 
+        continue
+    x = i.real/20.0
+    y = i.imag/20.0
     if x < minx and x > 0:
         minx = x
     if y < miny and y > 0:
@@ -98,8 +103,10 @@ f = open('render.svg','w')
 message = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">'
 idx = 0
 for i in points:  
-    x = i.real/10.0
-    y = i.imag/10.0
+    if not type(i) is complex: 
+        continue
+    x = i.real/20.0
+    y = i.imag/20.0
     print '{0:.4f} {1:.4f} .'.format(x-minx, maxy-y)
     message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="1" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
     s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))

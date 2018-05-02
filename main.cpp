@@ -125,8 +125,10 @@ void TurnPen(float deg) {
     // if (deg < 5 && deg > -5) return;
 
     *stdservo_ptr = 100;
-    int speed = 90, jt = 800;
-    if (abs(deg) <= 90) { jt += 6 * abs(deg-90); }
+    int speed = 90, jt = 700;
+    if (abs(deg) <= 90) { 
+        // jt += 6 * abs(deg-90); 
+        }
     else { jt = 1200; }
     ServoCtrl(speed);
     wait_ms(jt);
@@ -140,7 +142,7 @@ void TurnPen(float deg) {
     if(abs(deg) <= 90) 
         ServoDistance(-4);
     else 
-        ServoDistance(-2.5);
+        ServoDistance(-3);
     *stdservo_ptr = deg_ser;
     wait(0.1);
     ServoStop();

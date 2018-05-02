@@ -1,15 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-  <!-- <circle cx="240.00032" cy="244.25923" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="290.944449353" cy="217.819751764" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="237.418362253" cy="191.242487647" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="206.914339437" cy="140.880339259" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="243.578370394" cy="96.5632176543" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="307.000335" cy="93.25923" r="4" stroke="black" stroke-width="0" fill="red" /> -->
-<circle cx="12.0550" cy="32.3225" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="22.2404" cy="15.1068" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="19.2566" cy="33" r="4" stroke="black" stroke-width="0" fill="red" />
-<circle cx="11" cy="11" r="4" stroke="black" stroke-width="0" fill="red" />
+<?xml version="1.0" standalone="yes"?>
 
+<svg version="1.1" viewBox="0.0 0.0 960.0 720.0" fill="none" stroke="none" stroke-linecap="square" stroke-miterlimit="10" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><clipPath id="p.0"><path d="m0 0l960.0 0l0 720.0l-960.0 0l0 -720.0z" clip-rule="nonzero"></path></clipPath><g clip-path="url(#p.0)"><path fill="#000000" fill-opacity="0.0" d="m0 0l960.0 0l0 720.0l-960.0 0z" fill-rule="evenodd"></path><path fill="#000000" fill-opacity="0.0" d="m271.56467 247.69563c-19.365997 -9.1141205 -39.92679 -23.445847 -61.039383 -19.929138c-18.544281 3.088913 -39.029587 19.92958 -41.107605 38.61418c-4.7005615 42.265472 41.305496 77.115326 74.74278 103.39105c12.678406 9.962982 30.185577 14.507568 39.8609 27.40683" fill-rule="evenodd"></path><path stroke="#000000" stroke-width="1.0" stroke-linejoin="round" stroke-linecap="butt" d="m271.56467 247.69563c-19.365997 -9.1141205 -39.92679 -23.445847 -61.039383 -19.929138c-18.544281 3.088913 -39.029587 19.92958 -41.107605 38.61418c-4.7005615 42.265472 41.305496 77.115326 74.74278 103.39105c12.678406 9.962982 30.185577 14.507568 39.8609 27.40683" fill-rule="evenodd"></path><path fill="#000000" fill-opacity="0.0" d="m293.98688 245.20602c24.360504 -24.360504 69.62683 -44.293976 99.653534 -27.404205c14.890686 8.375885 20.827728 29.079117 22.422577 46.089233c2.8082275 29.951721 -10.614502 62.7146 -31.141724 84.706055c-25.41333 27.226105 -64.926605 36.647736 -95.91864 57.30182" fill-rule="evenodd"></path><path stroke="#000000" stroke-width="1.0" stroke-linejoin="round" stroke-linecap="butt" d="m293.98688 245.20602c24.360504 -24.360504 69.62683 -44.293976 99.653534 -27.404205c14.890686 8.375885 20.827728 29.079117 22.422577 46.089233c2.8082275 29.951721 -10.614502 62.7146 -31.141724 84.706055c-25.41333 27.226105 -64.926605 36.647736 -95.91864 57.30182" fill-rule="evenodd"></path></g></svg>
 
-
-</svg>

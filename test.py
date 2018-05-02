@@ -25,6 +25,7 @@ def getPoints(paths):
 
 str = sys.argv[1]
 mypaths, _ = svg2paths(os.path.abspath(str))
+print len(mypaths)
 mypaths = mypaths[2:-1:2]
 print mypaths
 print "------"
@@ -33,7 +34,9 @@ minx = 100000
 miny = 100000
 maxy = 0
 points = list(getPoints(mypaths))
+print points
 for i in points:
+    
     x = i.real/20.0
     y = i.imag/20.0
     if x < minx and x > 0:
