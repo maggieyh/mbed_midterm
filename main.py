@@ -86,8 +86,8 @@ miny = 100000
 maxy = 0
 points = list(getPoints(mypaths))
 for i in points:
-    x = i.real/15.0
-    y = i.imag/15.0
+    x = i.real/20.0
+    y = i.imag/20.0
     if x < minx and x > 0:
         minx = x
     if y < miny and y > 0:
@@ -98,8 +98,8 @@ f = open('render.svg','w')
 message = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">'
 idx = 0
 for i in points:  
-    x = i.real/15.0
-    y = i.imag/15.0
+    x = i.real/20.0
+    y = i.imag/20.0
     print '{0:.4f} {1:.4f} .'.format(x-minx, maxy-y)
     message += '<circle cx="{0:.4f}" cy="{1:.4f}" r="1" stroke="black" stroke-width="0" fill="red" /><text x="{0:.4f}" y="{1:.4f}" fill="black" style="font-size:3px;">{2}</text>'.format(x-minx+10, y-miny+10, idx)
     s.write('{0:.4f} {1:.4f} j'.format(x-minx, maxy-y))
@@ -111,3 +111,7 @@ message += '</svg>'
 f.write(message)
 f.close()
 s.write("endj")
+s.read(4)
+while True:
+    loc = s.read(19)
+    print "loc", loc

@@ -38,17 +38,18 @@ void PointToPoint(float x, float y);
 void communicate_mode();
 void default_sketch(int num);
 void TurnPen(float deg);
-int deg_ser = 63;
+int deg_ser = 61;
 int main(void)
 {
-    // mode = 3;
+    mode = 3;
     
     sys_init();
+    *stdservo_ptr = deg_ser;
     // ServoCtrl(100);
     // wait(1);
-    ServoStop();
-    // *stdservo_ptr = deg_ser;
-    // wait(1);
+    // ServoStop();
+    int vec = -60;
+    
     // *stdservo_ptr = 100;
     // TurnPen(60);
 
@@ -91,6 +92,7 @@ int main(void)
                         uLCD.cls(); 
                         uLCD.printf("running: %d\n", demo_num+1);
                         wait(3);
+                        *stdservo_ptr = deg_ser;
                         default_sketch(demo_num);
                         uLCD.cls();
                         uLCD.printf("Menu\n 1.Square \n 2.Triangle\n 3.Circle");
@@ -356,14 +358,22 @@ void default_sketch(int num) {
             wait(1);
             PointToPoint(0, 0);
             *stdservo_ptr=100;
+            float target = 0;
+            float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
+            TurnPen(turnDeg);
             break;
         case 2:
+            servo1_ptr->set_ramp(1500);
+            servo0_ptr->set_ramp(1500);
+            servo0_ptr->set_speed(10);
+            servo1_ptr->set_speed(-100);
+            
+            wait(10);
+            ServoStop();
             break;
 
     }
-    float target = 0;
-    float turnDeg = abs(target - car_theta) > 180 ? (360 - abs(target-car_theta)) * ((target - car_theta) > 0 ? -1 : 1) : target - car_theta ;
-    TurnPen(turnDeg);
+    
 }
 
 
@@ -456,11 +466,15 @@ void processPoints()
                 if(i + 1 < point_idx) {
                     deg_ser = 100;
                     PointToPoint(points[i+1][0], points[i+1][1]);
-                    deg_ser = 63;
-                    i+=2;
+                     xbee.printf("%5.3f %5.3f", points[i+1][0], points[i+1][1]);
+                    deg_ser = 61;
+                    i++;
+                    continue;
                 }
             }
-        
+            
+            xbee.printf("%5.1f %5.1f", points[i][0], points[i][1]);
+            wait(0.5);
             PointToPoint(points[i][0], points[i][1]);
             // if (i + 1 < point_idx && (points[i+1][0] < 0 || points[i+1][1] < 0))
             //     deg_ser = 100;
@@ -469,7 +483,7 @@ void processPoints()
         // }
     }
     
-    *stdservo_ptr = 100;
+    deg_ser = 100;
     PointToPoint(0, 0);
     
 }
