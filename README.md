@@ -9,13 +9,15 @@ A Boet Bot Car with a pen installed is able to draw sketch as soon as it receive
 * servo motor * 2
 * standard servo (for installing pen)
 * Battery box
-* Xbee * 2
-## Steps
-1. Assemble the Boet Bot Car as the picutre shown
-![Imgur](https://i.imgur.com/ihjfjRo.jpg)   
+* Xbee * 2  
 
-2.   
-2.1   
+## Steps   
+1. Assemble the Boet Bot Car as the picutre shown   
+![Imgur](https://i.imgur.com/ihjfjRo.jpg)     
+
+
+2. config   
+2.1        
 First adjust the servo motor speeds to allow the car move straight. The speeds of individual servo motor can be updated in methods including `ServoCtrl` , `ServoDistance` in the `main.cpp`.   
 
 2.2 
@@ -32,10 +34,11 @@ First connect the XBee to your PC, check your directory of Xbee
 
 For main.py, please first install the dependency `svgpathtools`, which will help parsing the scale vector image(which you draw by yourself!) into individual commands for the car.
 
-run the main.py with the following the commands `python main.py _your_img_file`
-The python file will connects the PC to the Boet Bot Car by using XBee. As the BBCar proceeds to draw the sketch, the PC will sequencially receive the BBCar position and print out on the command line.
+run the main.py with the following the commands `python main.py _your_img_file`  
+The python file will connects the PC to the Boet Bot Car by using XBee. As the BBCar proceeds to draw the sketch, the PC will sequencially receive the BBCar position and print out on the command line.    
 
-## Core Tech & Code Explain
+
+## Core Tech & Code Explain    
 0. Core function: draw out arbitrary sketch with multiple marks and curves 
 To allow the BBCar to darw out curves, I use svgpathtool to approximate the curves to Bezier curves, then sample the points on these curves then send these individual points to BBCar, so that BBCar sequentially processes these points.
 For multiple marks, the BBCar needs to know where a marks starts and ends, so the poitns sent from PC will have not only processed points(with positive value) but also those points of negative values which indicates BBCar to lift up the pen.
@@ -47,7 +50,7 @@ Then GSensor ginit starts running the gesture engine.
 The the sys_init will use uLCD display the mode menu on the LCD, and use gesture of up and down to move the  cursor, and right or left to confirm your choice. 
 
 ---
-`processPoints`:  
+`processPoints`:    
 As the name suggest, the function takes in individual coordinates.  `points`, global array, stores the sequential coordinates for the BBCar to draw out the corresponding sketch. processPoints method will go through these points and command the BBCar to move to these coordinates in right sequence. Note that BBCar supports multiple marks, so `points` stores the pause points which has either x or y to be less than zero, for that the BBCar simply proceed to the point without drawing out redundant lines.
 
 --- 
