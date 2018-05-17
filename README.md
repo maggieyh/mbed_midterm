@@ -16,10 +16,9 @@ A Boet Bot Car with a pen installed is able to draw sketch as soon as it receive
 ![Imgur](https://i.imgur.com/ihjfjRo.jpg)     
 
 
-2. config 
+2. config    
     2.1           
     First adjust the servo motor speeds to allow the car move straight. The speeds of individual servo motor can be updated in methods including `ServoCtrl` , `ServoDistance` in the `main.cpp`.   
-
     2.2   
     lines 9-25 in `main.cpp` configures the pin number connecting to the correesponding components. 
     lines 25-41 lists the major functions that will be used in the whole procedure
@@ -44,9 +43,9 @@ For multiple marks, the BBCar needs to know where a marks starts and ends, so th
   The main function runs `sys_init()` first:   
   The car_init configures the servo and encoder to encoder_ticker. 
   Then GSensor ginit starts running the gesture engine.
-  The the sys_init will use uLCD display the mode menu on the LCD, and use gesture of up and down to move the  cursor, and right or left to confirm your choice. 
+  The the sys_init will use uLCD display the mode menu on the LCD, and use gesture of up and down to move the  cursor, and right or left to confirm your choice.   
   `processPoints`:    
-  As the name suggest, the function takes in individual coordinates.  `points`, global array, stores the sequential coordinates for the BBCar to draw out the corresponding sketch. processPoints method will go through these points and command the BBCar to move to these coordinates in right sequence. Note that BBCar supports multiple marks, so `points` stores the pause points which has either x or y to be less than zero, for that the BBCar simply proceed to the point without drawing out redundant lines. 
+  As the name suggest, the function takes in individual coordinates.  `points`, global array, stores the sequential coordinates for the BBCar to draw out the corresponding sketch. processPoints method will go through these points and command the BBCar to move to these coordinates in right sequence. Note that BBCar supports multiple marks, so `points` stores the pause points which has either x or y to be less than zero, for that the BBCar simply proceed to the point without drawing out redundant lines.      
   `TurnPen`:  
   There is deviation between the center of the BBCar and the pen points, so to draw two successive lines with certain degree , the car needs to do adjustment before roating for the goal degree. 
 
