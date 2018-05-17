@@ -16,32 +16,33 @@ A Boet Bot Car with a pen installed is able to draw sketch as soon as it receive
 ![Imgur](https://i.imgur.com/ihjfjRo.jpg)     
 
 
-2. config   
-2.1        
+2. config 
+
+2.1           
 First adjust the servo motor speeds to allow the car move straight. The speeds of individual servo motor can be updated in methods including `ServoCtrl` , `ServoDistance` in the `main.cpp`.   
 
-2.2 
+2.2   
 lines 9-25 in `main.cpp` configures the pin number connecting to the correesponding components. 
-
 lines 25-41 lists the major functions that will be used in the whole procedure
 
-3. flash the `main.cpp` into the k64F board
+3. flash the `main.cpp` into the k64F board  
 
-4. Press reset on K64f, the uLCD will display the menu: choosing between remote or local. Remote function will connects to the PC which is executing `main.py` under the same directory with the paired Xbees, and receives the goal sketch from PC, then proceeds to draw. As for local function, the doodle car can draw some simple sketch in case it is not connected to remote PC.
+4. Press reset on K64f, the uLCD will display the menu: choosing between remote or local. Remote function will connects to the PC which is executing `main.py` under the same directory with the paired Xbees, and receives the goal sketch from PC, then proceeds to draw. As for local function, the doodle car can draw some simple sketch in case it is not connected to remote PC.    
+ 
+4.1 For remote function of BBCar   
+First connect the XBee to your PC, check your directory of Xbee    
 
-4.1 For remote function of BBCar
-First connect the XBee to your PC, check your directory of Xbee  
+For main.py, please first install the dependency `svgpathtools`, which will help parsing the scale vector image(which you draw by yourself!) into individual commands for the car.   
 
-For main.py, please first install the dependency `svgpathtools`, which will help parsing the scale vector image(which you draw by yourself!) into individual commands for the car.
-
-run the main.py with the following the commands `python main.py _your_img_file`  
-The python file will connects the PC to the Boet Bot Car by using XBee. As the BBCar proceeds to draw the sketch, the PC will sequencially receive the BBCar position and print out on the command line.    
+run the main.py with the following the commands `python main.py _your_img_file`    
+The python file will connects the PC to the Boet Bot Car by using XBee. As the BBCar proceeds to draw the sketch, the PC will sequencially receive the BBCar position and print out on the command line.      
 
 
 ## Core Tech & Code Explain    
-0. Core function: draw out arbitrary sketch with multiple marks and curves 
+0. Core function: draw out arbitrary sketch with multiple marks and curves   
 To allow the BBCar to darw out curves, I use svgpathtool to approximate the curves to Bezier curves, then sample the points on these curves then send these individual points to BBCar, so that BBCar sequentially processes these points.
-For multiple marks, the BBCar needs to know where a marks starts and ends, so the poitns sent from PC will have not only processed points(with positive value) but also those points of negative values which indicates BBCar to lift up the pen.
+For multiple marks, the BBCar needs to know where a marks starts and ends, so the poitns sent from PC will have not only processed points(with positive value) but also those points of negative values which indicates BBCar to lift up the pen.   
+
 
 1. main.cpp
 The main function runs `sys_init()` first:   
