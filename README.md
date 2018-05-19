@@ -47,8 +47,13 @@ For multiple marks, the BBCar needs to know where a marks starts and ends, so th
   `processPoints`:    
   As the name suggest, the function takes in individual coordinates.  `points`, global array, stores the sequential coordinates for the BBCar to draw out the corresponding sketch. processPoints method will go through these points and command the BBCar to move to these coordinates in right sequence. Note that BBCar supports multiple marks, so `points` stores the pause points which has either x or y to be less than zero, for that the BBCar simply proceed to the point without drawing out redundant lines.      
   `TurnPen`:  
-  There is deviation between the center of the BBCar and the pen points, so to draw two successive lines with certain degree , the car needs to do adjustment before roating for the goal degree. 
-
+  There is deviation between the center of the BBCar and the pen points, so to draw two successive lines with certain degree , the car needs to do adjustment before roating for the goal degree.    
+  `communicate_mode`:   
+  Once the Xbees connect to each other, the python scripts send out the sample points of the sketch to BBCar, and this function is receiving these points and save them into a global array in the main.cpp, which will later be processed by `processPoint` method.   
 
 2. main.py
 The python file starts with parsing the input images into sampled points as in lines 87-104. Then the points will be sent through serial by Xbee to the BBCar.
+
+3. major problems
+When adjusting the motor operations, there was one point when changing the wait time or speed does not yield a different result. That is, say I want the car to go for slightly less distance, but changing the wait time did not yield the stop to be earilier. The problem lies in the `parallax_servo` module. In line 209, `servo_ticker` is scheduled every .5 second, so the resolution of the moving wait time is .5(which is quite a long time and long error distance for BBCar to go). And this means that the `ServoStop` function doesn't really stop at that instant when the function is called but wait for the next ticker event to stop the servo.
+The workaround method is to call `servo_control` in parallax module directly, since this method is actually what servo ticker called to update the motor's state. 
